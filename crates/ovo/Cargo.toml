@@ -1,0 +1,10 @@
+[package]
+name = "ovo"
+version = "0.1.0"
+description = "OvO - A JavaScript runtime built with QuickJS and Rust."
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+ovo-quickjs = { workspace = true }

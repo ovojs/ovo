@@ -1,0 +1,12 @@
+[package]
+name = "ovo-quickjs"
+version = "0.1.0"
+description = "QuickJS Rust bindings."
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[build-dependencies]
+bindgen = "0.70.1"
+cc = "1.1.30"
+
