@@ -8,3 +8,6 @@ repository.workspace = true
 
 [dependencies]
 ovo-quickjs = { workspace = true }
+
+anyhow = { workspace = true }
+url    = { workspace = true }

@@ -10,3 +10,6 @@ repository = "https://github.com/ovojs/ovo"
 [workspace.dependencies]
 ovo         = { version = "*", path = "crates/ovo"}
 ovo-quickjs = { version = "*", path = "crates/ovo-quickjs"}
+
+anyhow = "1.0.89"
+url = "2.5.2"
