@@ -2,7 +2,7 @@ use crate::context::{Context, DropFromContext};
 use ovo_quickjs::*;
 use std::ffi::c_int;
 
-pub struct Value(JSValue);
+pub struct Value(pub(crate) JSValue);
 
 impl Value {
   #[inline(always)]
@@ -29,6 +29,11 @@ impl Value {
     } else {
       None
     }
+  }
+
+  #[inline(always)]
+  pub fn struct_eq(&self, ctx: &Context, val: &Value) -> bool {
+    unsafe { JS_StrictEq(ctx.inner.as_ptr(), self.0, val.0) != 0 }
   }
 }
 

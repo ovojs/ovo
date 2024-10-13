@@ -1,8 +1,9 @@
 use crate::{Runtime, Value};
 use anyhow::Error;
 use ovo_quickjs::*;
-use std::{ptr::NonNull, sync::Arc};
+use std::{mem::forget, ptr::NonNull, sync::Arc};
 
+#[derive(Clone)]
 pub struct Context {
   pub(crate) inner: NonNull<JSContext>,
 }
@@ -14,7 +15,7 @@ impl Context {
     Self { inner }
   }
 
-  pub fn eval(&self) -> Result<Owned<Value>, Error> {
+  pub fn eval(&self, source: &str) -> Result<Owned<Value>, Error> {
     unimplemented!()
   }
 }
@@ -29,9 +30,30 @@ pub trait DropFromContext {
   fn drop_from_context(&mut self, ctx: &Context);
 }
 
-pub struct Owned<T: DropFromContext> {
+pub struct Owned<T>
+where
+  T: DropFromContext,
+{
   data: NonNull<T>,
   context: Arc<Context>,
+}
+
+impl<T> Owned<T>
+where
+  T: DropFromContext,
+{
+  pub fn new(ctx: &Context, raw: *mut T) -> Self {
+    let data = NonNull::new(raw).unwrap();
+    let context = Arc::new(ctx.clone());
+    Self { data, context }
+  }
+
+  #[inline(always)]
+  pub fn into_raw(self) -> NonNull<T> {
+    let data = self.data;
+    forget(self);
+    data
+  }
 }
 
 impl<T> Drop for Owned<T>

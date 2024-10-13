@@ -46,7 +46,7 @@ pub struct RuntimeOptions {
 extern "C" fn js_module_normalizer(
   ctx: *mut JSContext,
   module_base_name: *const c_char,
-  module_name: *const ::std::os::raw::c_char,
+  module_name: *const c_char,
   opaque: *mut c_void,
 ) -> *mut c_char {
   unimplemented!()
