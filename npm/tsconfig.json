@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "lib": ["ESNext"],
+    "skipLibCheck": false,
+    "strict": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "disableSolutionSearching": true,
+    "noUnusedLocals": true,
+    "noEmit": true,
+    "resolveJsonModule": true
+  },
+  "include": ["src/*.d.ts"]
+}

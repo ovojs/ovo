@@ -1,0 +1,13 @@
+{
+  "name": "ovo-types",
+  "version": "0.0.1",
+  "description": "Type declarations for OvO, a JavaScript runtime built with QuickJS and Rust.",
+  "keywords": [
+    "ovo",
+    "ovo.js"
+  ],
+  "files": [
+    "src/*.d.ts"
+  ],
+  "types": "src/ovo.d.ts"
+}
