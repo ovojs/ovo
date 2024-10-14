@@ -1,41 +1,8 @@
-use crate::context::{Context, DropFromContext};
-use ovo_quickjs::*;
-use std::ffi::c_int;
+use crate::handle::DropFromContext;
+use crate::{Context, Value};
+use ovo_quickjs::JS_FreeValue;
 
-pub struct Value(pub(crate) JSValue);
-
-impl Value {
-  #[inline(always)]
-  pub fn from_bool(ctx: &Context, val: bool) -> Self {
-    unsafe { Self(JS_NewBool(ctx.inner.as_ptr(), val as c_int)) }
-  }
-
-  #[inline(always)]
-  pub fn from_i32(ctx: &Context, val: i32) -> Self {
-    unsafe { Self(JS_NewInt32(ctx.inner.as_ptr(), val)) }
-  }
-
-  #[inline(always)]
-  pub fn to_bool(&self, ctx: &Context) -> Option<bool> {
-    unsafe { Some(JS_ToBool(ctx.inner.as_ptr(), self.0) != 0) }
-  }
-
-  #[inline(always)]
-  pub fn to_i32(&self, ctx: &Context) -> Option<i32> {
-    let mut val = 0;
-    let ret = unsafe { JS_ToInt32(ctx.inner.as_ptr(), &mut val as *mut i32, self.0) };
-    if ret == 0 {
-      Some(val)
-    } else {
-      None
-    }
-  }
-
-  #[inline(always)]
-  pub fn struct_eq(&self, ctx: &Context, val: &Value) -> bool {
-    unsafe { JS_StrictEq(ctx.inner.as_ptr(), self.0, val.0) != 0 }
-  }
-}
+impl Value {}
 
 impl DropFromContext for Value {
   fn drop_from_context(&mut self, ctx: &Context) {
@@ -46,15 +13,25 @@ impl DropFromContext for Value {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::Runtime;
+  use crate::{BigInt64, Bool, Float64, Int32, Int64, Runtime};
+  use std::i64;
 
   #[test]
-  fn basic() {
+  fn value_convertion() {
     let rt = &Runtime::new(Default::default());
     let ctx = &Context::new(rt);
-    let val_bool = Value::from_bool(ctx, true);
-    assert_eq!(val_bool.to_bool(ctx).unwrap(), true);
-    let val_i32 = Value::from_i32(ctx, 114514);
-    assert_eq!(val_i32.to_i32(ctx).unwrap(), 114514);
+
+    let boolean = Bool::new(ctx, true);
+    assert_eq!(boolean.value(ctx).unwrap(), true);
+
+    let int32 = Int32::new(ctx, 114514);
+    assert_eq!(int32.value(ctx).unwrap(), 114514);
+    let int64 = Int64::new(ctx, i64::MAX);
+    assert_ne!(int64.value(ctx).unwrap(), i64::MAX);
+    let bigint64 = BigInt64::new(ctx, i64::MAX);
+    assert_eq!(bigint64.value(ctx).unwrap(), i64::MAX);
+
+    let float64 = Float64::new(ctx, 3.1415926);
+    assert_eq!(float64.value(ctx).unwrap(), 3.1415926);
   }
 }

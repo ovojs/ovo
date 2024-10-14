@@ -25,7 +25,7 @@ impl Runtime {
         inner,
         Some(js_module_normalizer),
         Some(js_module_loader),
-        Box::into_raw(Box::new(loader.as_ref())) as *mut c_void,
+        Rc::into_raw(loader) as *mut c_void,
       );
     }
   }
