@@ -47,5 +47,3 @@ impl_from!(BigInt64 for Value);
 impl_from!(BigUint64 for Value);
 impl_from!(Float64 for Value);
 impl_from!(String for Value);
-
-impl_from!(Value for JSValue);
