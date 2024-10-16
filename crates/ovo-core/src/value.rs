@@ -1,6 +1,7 @@
+use crate::context::Context;
+use crate::data::Value;
 use crate::handle::{CloneFromContext, DropFromContext};
-use crate::{Context, Value};
-use ovo_quickjs::*;
+use crate::quickjs::*;
 
 impl Value {}
 

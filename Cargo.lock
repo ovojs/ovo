@@ -165,19 +165,28 @@ dependencies = [
 [[package]]
 name = "ovo"
 version = "0.1.0"
+
+[[package]]
+name = "ovo-core"
+version = "0.1.0"
 dependencies = [
  "anyhow",
- "ovo-quickjs",
+ "bindgen",
+ "cc",
  "url",
 ]
 
 [[package]]
-name = "ovo-quickjs"
+name = "ovo-gui"
 version = "0.1.0"
-dependencies = [
- "bindgen",
- "cc",
-]
+
+[[package]]
+name = "ovo-lsp"
+version = "0.1.0"
+
+[[package]]
+name = "ovo-qdb"
+version = "0.1.0"
 
 [[package]]
 name = "percent-encoding"

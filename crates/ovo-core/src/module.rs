@@ -1,5 +1,5 @@
+use crate::quickjs::*;
 use anyhow::Error;
-use ovo_quickjs::*;
 use std::ptr::NonNull;
 use url::Url;
 

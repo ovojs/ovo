@@ -1,8 +1,8 @@
-use ovo_quickjs::*;
+use crate::quickjs::*;
 use std::ptr::NonNull;
 
 pub struct Runtime {
-  pub(crate) inner: NonNull<JSRuntime>, 
+  pub(crate) inner: NonNull<JSRuntime>,
 }
 
 impl Runtime {

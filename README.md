@@ -1,12 +1,11 @@
 # OvO
 
-🦉 OvO JavaScript Runtime 
+🦉 OvO JavaScript Runtime
 
 
 ## Goals
 
-- Compatible with the Web standard
-- Compatible with NodeJS and NPM
-- Support for TypeScript out of the box
-- Complete standard library with APIs for embedding scenarios
-
+- OvO APIs (POSIX-like)
+- Web APIs
+- Node API
+- Extensions

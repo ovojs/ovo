@@ -8,8 +8,7 @@ license = "MIT"
 repository = "https://github.com/ovojs/ovo"
 
 [workspace.dependencies]
-ovo         = { version = "*", path = "crates/ovo"}
-ovo-quickjs = { version = "*", path = "crates/ovo-quickjs"}
+ovo-core = { version = "*", path = "crates/ovo-core"}
 
 anyhow = "1.0.89"
 url = "2.5.2"

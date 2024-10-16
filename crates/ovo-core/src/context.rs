@@ -1,6 +1,8 @@
-use crate::{Owned, Runtime, String, Value};
+use crate::data::Value;
+use crate::handle::Owned;
+use crate::quickjs::*;
+use crate::runtime::Runtime;
 use anyhow::Error;
-use ovo_quickjs::*;
 use std::ptr::NonNull;
 
 pub struct Context(pub(crate) NonNull<JSContext>);

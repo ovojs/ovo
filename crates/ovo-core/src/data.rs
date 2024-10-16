@@ -1,4 +1,4 @@
-use ovo_quickjs::JSValue;
+use crate::quickjs::*;
 use std::convert::From;
 use std::mem::transmute;
 

@@ -4,10 +4,10 @@
   "description": "Type declarations for OvO, a JavaScript runtime built with QuickJS and Rust.",
   "keywords": [
     "ovo",
-    "ovo.js"
+    "ovojs"
   ],
   "files": [
     "src/*.d.ts"
   ],
-  "types": "src/ovo.d.ts"
+  "types": "src/index.d.ts"
 }

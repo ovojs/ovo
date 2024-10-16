@@ -1,6 +1,8 @@
-use crate::{BigInt64, BigUint64, Bool, Int32, Int64, String, Uint32};
-use crate::{Context, Float64};
-use ovo_quickjs::*;
+use crate::context::Context;
+use crate::data::{
+  BigInt64, BigUint64, Bool, Float64, Int32, Int64, String, Uint32,
+};
+use crate::quickjs::*;
 use std::ffi::{c_char, c_int, CStr};
 
 impl Bool {
@@ -112,4 +114,3 @@ impl String {
     }
   }
 }
-
