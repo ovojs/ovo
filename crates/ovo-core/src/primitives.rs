@@ -1,8 +1,8 @@
 use crate::context::Context;
-use crate::data::{
+use crate::quickjs::*;
+use crate::value::{
   BigInt64, BigUint64, Bool, Float64, Int32, Int64, String, Uint32,
 };
-use crate::quickjs::*;
 use std::ffi::{c_char, c_int, CStr};
 
 impl Bool {

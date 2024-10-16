@@ -1,5 +1,4 @@
 mod context;
-mod data;
 mod handle;
 mod module;
 mod primitives;

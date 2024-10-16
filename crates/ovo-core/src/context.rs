@@ -1,7 +1,7 @@
-use crate::data::Value;
 use crate::handle::Owned;
 use crate::quickjs::*;
 use crate::runtime::Runtime;
+use crate::value::Value;
 use anyhow::Error;
 use std::ptr::NonNull;
 
