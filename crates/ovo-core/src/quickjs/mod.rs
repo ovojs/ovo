@@ -16,7 +16,7 @@ mod tests {
       let ctx = JS_NewContext(rt);
 
       let src = CString::new("40 + 2").unwrap();
-      let name = CString::new("anon").unwrap();
+      let name = CString::new("<init>").unwrap();
 
       let val = JS_Eval(
         ctx,

@@ -114,3 +114,41 @@ impl String {
     }
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use crate::context::Context;
+  use crate::runtime::Runtime;
+  use crate::value::{BigInt64, Bool, Float64, Int32, Int64, String};
+  use std::i64;
+
+  #[test]
+  fn value_assertion() {
+    let rt = &Runtime::new();
+    let ctx = &Context::new(rt);
+
+    let value = true;
+    let boolean = Bool::new(ctx, true);
+    assert_eq!(boolean.value(ctx), value);
+
+    let value = 114514;
+    let int32 = Int32::new(ctx, value);
+    assert_eq!(int32.value(ctx), value);
+
+    let value = 114.514;
+    let float64 = Float64::new(ctx, value);
+    assert_eq!(float64.value(ctx), value);
+
+    let value = 114514;
+    let int64 = Int64::new(ctx, value);
+    assert_eq!(int64.value(ctx), value);
+
+    let value = i64::MAX;
+    let bigint64 = BigInt64::new(ctx, value);
+    assert_eq!(bigint64.value(ctx), value);
+
+    let value = "OvO";
+    let string = String::new(ctx, value);
+    assert_eq!(string.value(ctx), value);
+  }
+}

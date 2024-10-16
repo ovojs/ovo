@@ -5,3 +5,4 @@ mod primitives;
 mod quickjs;
 mod runtime;
 mod value;
+mod worker;
