@@ -1,6 +1,6 @@
 use crate::context::Context;
 use crate::handle::Owned;
-use crate::runtime::Runtime;
+use crate::runtime::{Runtime, RuntimeOptions};
 use crate::value::{String, Value};
 use anyhow::Error;
 use std::sync::Arc;
@@ -12,7 +12,9 @@ pub struct Worker {
 
 impl Worker {
   pub fn new(options: WorkerOptions) -> Self {
-    let runtime = Runtime::new();
+    let runtime = Runtime::new(RuntimeOptions {
+      ..RuntimeOptions::default()
+    });
     let context = Context::new(&runtime);
     Self {
       runtime,

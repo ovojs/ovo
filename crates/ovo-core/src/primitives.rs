@@ -118,13 +118,13 @@ impl String {
 #[cfg(test)]
 mod tests {
   use crate::context::Context;
-  use crate::runtime::Runtime;
+  use crate::runtime::{Runtime, RuntimeOptions};
   use crate::value::{BigInt64, Bool, Float64, Int32, Int64, String};
   use std::i64;
 
   #[test]
   fn value_assertion() {
-    let rt = &Runtime::new();
+    let rt = &Runtime::new(RuntimeOptions::default());
     let ctx = &Context::new(rt);
 
     let value = true;

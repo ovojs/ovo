@@ -44,3 +44,30 @@ impl ModuleLoader for NoopModuleLoader {
     unimplemented!()
   }
 }
+
+pub struct ExtModuleLoader;
+
+impl ExtModuleLoader {
+  pub fn new() -> Self {
+    Self {}
+  }
+}
+
+impl ModuleLoader for ExtModuleLoader {
+  fn resolve(
+    &self,
+    ctx: &Context,
+    specifier: &str,
+    referer: &str,
+  ) -> Result<ModuleSpecifier, Error> {
+    unimplemented!()
+  }
+
+  fn load(
+    &self,
+    ctx: &Context,
+    specifier: ModuleSpecifier,
+  ) -> Result<Module, Error> {
+    unimplemented!()
+  }
+}

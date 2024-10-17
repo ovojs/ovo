@@ -10,7 +10,7 @@ pub struct Context(pub(crate) NonNull<JSContext>);
 
 impl Context {
   pub fn new(rt: &Runtime) -> Self {
-    let raw_rt = rt.0.as_ptr();
+    let raw_rt = rt.inner.as_ptr();
     let raw_ctx = unsafe { JS_NewContext(raw_rt) };
     Self(NonNull::new(raw_ctx).expect("non-null context"))
   }
