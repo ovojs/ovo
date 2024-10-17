@@ -13,7 +13,7 @@ pub struct Worker {
 impl Worker {
   pub fn new(options: WorkerOptions) -> Self {
     let runtime = Runtime::new(RuntimeOptions {
-      ..RuntimeOptions::default()
+      ..Default::default()
     });
     let context = Context::new(&runtime);
     Self {

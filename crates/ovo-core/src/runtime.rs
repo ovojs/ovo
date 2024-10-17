@@ -1,20 +1,15 @@
 use crate::context::Context;
-use crate::module::{ExtModuleLoader, ModuleLoader, ModuleSpecifier};
+use crate::module::{
+  ExtModuleLoader, ModuleLoader, ModuleSpecifier, ModuleSpecifierMap,
+};
 use crate::quickjs::*;
 use std::ffi::{c_char, c_void, CStr, CString};
 use std::ptr::NonNull;
 use std::rc::Rc;
 
+#[derive(Default)]
 pub struct RuntimeOptions {
-  pub loader: Rc<dyn ModuleLoader>,
-}
-
-impl Default for RuntimeOptions {
-  fn default() -> Self {
-    Self {
-      loader: Rc::new(ExtModuleLoader::new()),
-    }
-  }
+  pub loader: Option<Rc<dyn ModuleLoader>>,
 }
 
 pub struct Runtime {
@@ -26,10 +21,10 @@ impl Runtime {
   pub fn new(options: RuntimeOptions) -> Box<Self> {
     let raw = unsafe { JS_NewRuntime() };
     let inner = NonNull::new(raw).expect("non-null runtime");
-    let runtime = Box::new(Self {
-      inner,
-      loader: options.loader,
+    let loader = options.loader.unwrap_or_else(|| {
+      Rc::new(ExtModuleLoader::new(ModuleSpecifierMap::new()))
     });
+    let runtime = Box::new(Self { inner, loader });
     runtime.init_module_loader();
     runtime
   }

@@ -1,5 +1,6 @@
 use crate::{context::Context, quickjs::*};
 use anyhow::Error;
+use std::collections::HashMap;
 use std::ptr::NonNull;
 use url::Url;
 
@@ -24,11 +25,15 @@ pub struct Module(pub(crate) NonNull<JSModuleDef>);
 
 impl Module {}
 
-pub struct ExtModuleLoader;
+pub type ModuleSpecifierMap = HashMap<String, ModuleSpecifier>;
+
+pub struct ExtModuleLoader {
+  specifier_map: ModuleSpecifierMap,
+}
 
 impl ExtModuleLoader {
-  pub fn new() -> Self {
-    Self {}
+  pub fn new(specifier_map: ModuleSpecifierMap) -> Self {
+    Self { specifier_map }
   }
 }
 
