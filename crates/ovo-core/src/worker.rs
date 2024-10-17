@@ -1,7 +1,7 @@
 use crate::context::Context;
 use crate::handle::Owned;
 use crate::runtime::{Runtime, RuntimeOptions};
-use crate::value::{String, Value};
+use crate::value::Value;
 use anyhow::Error;
 use std::sync::Arc;
 
@@ -22,12 +22,7 @@ impl Worker {
     }
   }
 
-  pub fn eval_code(&self, source: &str) -> Result<Owned<Value>, Error> {
-    let source = String::new(&self.context, source);
-    self.context.eval(source)
-  }
-
-  pub fn eval_file(&self, path: &str) -> Result<Owned<Value>, Error> {
+  pub fn fetch(&self) -> Result<Owned<Value>, Error> {
     unimplemented!()
   }
 }

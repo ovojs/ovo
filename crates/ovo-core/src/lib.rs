@@ -1,8 +1,8 @@
-mod context;
-mod handle;
-mod module;
-mod primitives;
+pub mod context;
+pub mod handle;
+pub mod module;
+pub mod runtime;
+pub mod value;
+pub mod worker;
+
 mod quickjs;
-mod runtime;
-mod value;
-mod worker;
