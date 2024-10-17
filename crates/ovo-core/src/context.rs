@@ -60,6 +60,7 @@ impl Context {
     self.to_owned_or_error(value)
   }
 
+  #[inline(always)]
   fn to_owned_or_error(&self, value: Value) -> Result<Owned<Value>, Error> {
     if value.is_exception() {
       Err(anyhow!("todo: get exception message from value"))
@@ -131,6 +132,22 @@ mod tests {
         String::new(&ctx, "40 + 2"),
         String::new(&ctx, "init"),
         EvalType::Script(EvalFlag::None),
+      )
+      .expect("42");
+    let expected = Value::from(Int32::new(&ctx, 42));
+    assert!(value == expected);
+    assert!(value == Owned::new(ctx, expected));
+  }
+
+  #[test]
+  fn evaluate_module() {
+    let rt = Runtime::new(RuntimeOptions::default());
+    let ctx = Context::new(&rt);
+    let value = ctx
+      .evaluate(
+        String::new(&ctx, "import A from './A'; 40 + 2"),
+        String::new(&ctx, "init"),
+        EvalType::Module(EvalFlag::None),
       )
       .expect("42");
     let expected = Value::from(Int32::new(&ctx, 42));

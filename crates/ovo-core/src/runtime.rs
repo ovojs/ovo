@@ -2,7 +2,6 @@ use crate::context::Context;
 use crate::module::{ExtModuleLoader, ModuleLoader, ModuleSpecifier};
 use crate::quickjs::*;
 use std::ffi::{c_char, c_void, CStr, CString};
-use std::mem::transmute;
 use std::ptr::NonNull;
 use std::rc::Rc;
 
@@ -24,13 +23,13 @@ pub struct Runtime {
 }
 
 impl Runtime {
-  pub fn new(options: RuntimeOptions) -> Self {
+  pub fn new(options: RuntimeOptions) -> Box<Self> {
     let raw = unsafe { JS_NewRuntime() };
     let inner = NonNull::new(raw).expect("non-null runtime");
-    let runtime = Self {
+    let runtime = Box::new(Self {
       inner,
       loader: options.loader,
-    };
+    });
     runtime.init_module_loader();
     runtime
   }
@@ -39,16 +38,16 @@ impl Runtime {
     unsafe {
       JS_SetModuleLoaderFunc(
         self.inner.as_ptr(),
-        Some(module_normalizer_unsafe),
+        Some(module_resolver_unsafe),
         Some(module_loader_unsafe),
-        Box::into_raw(Box::new(self)) as *mut c_void,
+        self as *const Runtime as *const () as *mut c_void,
       );
     }
   }
 }
 
 #[no_mangle]
-unsafe extern "C" fn module_normalizer_unsafe(
+unsafe extern "C" fn module_resolver_unsafe(
   ctx: *mut JSContext,
   module_base_name: *const c_char,
   module_name: *const c_char,
@@ -56,14 +55,14 @@ unsafe extern "C" fn module_normalizer_unsafe(
 ) -> *mut c_char {
   let context = Context::from_raw(ctx);
   let opaque = NonNull::new(opaque).expect("non-null opaque");
-  let runtime = transmute::<*mut c_void, *mut Runtime>(opaque.as_ptr());
+  let runtime = opaque.as_ptr() as *const Runtime;
   let module_name = CStr::from_ptr(module_name)
     .to_str()
     .expect("utf8 module name");
   let module_base_name = CStr::from_ptr(module_base_name)
     .to_str()
     .expect("utf8 module base name");
-  let specifier = (*runtime)
+  let specifier = (&*runtime)
     .loader
     .resolve(&context, module_name, module_base_name)
     .expect("resolve module");
@@ -82,12 +81,12 @@ unsafe extern "C" fn module_loader_unsafe(
 ) -> *mut JSModuleDef {
   let context = Context::from_raw(ctx);
   let opaque = NonNull::new(opaque).expect("non-null opaque");
-  let runtime = transmute::<*mut c_void, *mut Runtime>(opaque.as_ptr());
-  // Re-take the ownership of module_name returned by module_normalizer
+  let runtime = opaque.as_ptr() as *mut Runtime;
+  // Re-take the ownership of module_name returned by module_resolver_unsafe
   let binding = CString::from_raw(module_name as *mut c_char);
   let specifier = binding.as_c_str().to_str().expect("specifier");
   let specifier = ModuleSpecifier::parse(specifier).expect("parse specifier");
-  (*runtime)
+  (&*runtime)
     .loader
     .load(&context, specifier)
     .expect("load module")

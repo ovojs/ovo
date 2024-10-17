@@ -6,7 +6,7 @@ use anyhow::Error;
 use std::sync::Arc;
 
 pub struct Worker {
-  runtime: Runtime,
+  runtime: Box<Runtime>,
   context: Arc<Context>,
 }
 
