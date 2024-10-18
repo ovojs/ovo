@@ -3,6 +3,7 @@ members = ["crates/*"]
 resolver = "2"
 
 [workspace.package]
+authors = ["The OvO team"]
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/ovojs/ovo"
@@ -11,4 +12,5 @@ repository = "https://github.com/ovojs/ovo"
 ovo-core = { version = "*", path = "crates/ovo-core"}
 
 anyhow = "1.0.89"
+clap = "4.5.20"
 url = "2.5.2"
