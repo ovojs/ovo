@@ -6,6 +6,7 @@ use crate::quickjs::*;
 use std::ffi::{c_char, c_void, CStr, CString};
 use std::ptr::NonNull;
 use std::rc::Rc;
+use std::sync::Arc;
 
 #[derive(Default)]
 pub struct RuntimeOptions {
@@ -18,13 +19,13 @@ pub struct Runtime {
 }
 
 impl Runtime {
-  pub fn new(options: RuntimeOptions) -> Box<Self> {
+  pub fn new(options: RuntimeOptions) -> Arc<Self> {
     let raw = unsafe { JS_NewRuntime() };
     let inner = NonNull::new(raw).expect("non-null runtime");
     let loader = options.loader.unwrap_or_else(|| {
       Rc::new(ExtModuleLoader::new(ModuleSpecifierMap::new()))
     });
-    let runtime = Box::new(Self { inner, loader });
+    let runtime = Arc::new(Self { inner, loader });
     runtime.init_module_loader();
     runtime
   }

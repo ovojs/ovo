@@ -201,31 +201,31 @@ mod tests {
 
   #[test]
   fn value_assertion() {
-    let rt = &Runtime::new(RuntimeOptions::default());
-    let ctx = &Context::new(rt);
+    let runtime = Runtime::new(RuntimeOptions::default());
+    let context = &Context::new(runtime);
 
     let value = true;
-    let boolean = Bool::new(ctx, true);
-    assert_eq!(boolean.value(ctx), value);
+    let boolean = Bool::new(context, true);
+    assert_eq!(boolean.value(context), value);
 
     let value = 114514;
-    let int32 = Int32::new(ctx, value);
-    assert_eq!(int32.value(ctx), value);
+    let int32 = Int32::new(context, value);
+    assert_eq!(int32.value(context), value);
 
     let value = 114.514;
-    let float64 = Float64::new(ctx, value);
-    assert_eq!(float64.value(ctx), value);
+    let float64 = Float64::new(context, value);
+    assert_eq!(float64.value(context), value);
 
     let value = 114514;
-    let int64 = Int64::new(ctx, value);
-    assert_eq!(int64.value(ctx), value);
+    let int64 = Int64::new(context, value);
+    assert_eq!(int64.value(context), value);
 
     let value = i64::MAX;
-    let bigint64 = BigInt64::new(ctx, value);
-    assert_eq!(bigint64.value(ctx), value);
+    let bigint64 = BigInt64::new(context, value);
+    assert_eq!(bigint64.value(context), value);
 
     let value = "OvO";
-    let string = String::new(ctx, value);
-    assert_eq!(string.value(ctx), value);
+    let string = String::new(context, value);
+    assert_eq!(string.value(context), value);
   }
 }

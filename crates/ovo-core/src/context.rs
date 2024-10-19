@@ -6,13 +6,14 @@ use anyhow::{anyhow, Error};
 use std::ffi::c_int;
 use std::mem::transmute;
 use std::ptr::NonNull;
+use std::sync::Arc;
 
 pub struct Context(pub(crate) NonNull<JSContext>);
 
 impl Context {
-  pub fn new(rt: &Runtime) -> Self {
-    let raw_rt = rt.inner.as_ptr();
-    let raw_ctx = unsafe { JS_NewContext(raw_rt) };
+  pub fn new(runtime: Arc<Runtime>) -> Self {
+    let raw_runtime = runtime.inner.as_ptr();
+    let raw_ctx = unsafe { JS_NewContext(raw_runtime) };
     Self(NonNull::new(raw_ctx).expect("non-null context"))
   }
 
@@ -125,33 +126,33 @@ mod tests {
 
   #[test]
   fn evaluate_script() {
-    let rt = Runtime::new(RuntimeOptions::default());
-    let ctx = Context::new(&rt);
-    let value = ctx
+    let runtime = Runtime::new(RuntimeOptions::default());
+    let context = Context::new(runtime);
+    let value = context
       .evaluate(
-        String::new(&ctx, "40 + 2"),
-        String::new(&ctx, "init"),
+        String::new(&context, "40 + 2"),
+        String::new(&context, "init"),
         EvalType::Script(EvalFlag::None),
       )
       .expect("42");
-    let expected = Value::from(Int32::new(&ctx, 42));
+    let expected = Value::from(Int32::new(&context, 42));
     assert!(value == expected);
-    assert!(value == Owned::new(ctx, expected));
+    assert!(value == Owned::new(context, expected));
   }
 
   #[test]
   fn evaluate_module() {
-    let rt = Runtime::new(RuntimeOptions::default());
-    let ctx = Context::new(&rt);
-    let value = ctx
+    let runtime = Runtime::new(RuntimeOptions::default());
+    let context = Context::new(runtime);
+    let value = context
       .evaluate(
-        String::new(&ctx, "import A from './A'; 40 + 2"),
-        String::new(&ctx, "init"),
+        String::new(&context, "import A from './A'; 40 + 2"),
+        String::new(&context, "init"),
         EvalType::Module(EvalFlag::None),
       )
       .expect("42");
-    let expected = Value::from(Int32::new(&ctx, 42));
+    let expected = Value::from(Int32::new(&context, 42));
     assert!(value == expected);
-    assert!(value == Owned::new(ctx, expected));
+    assert!(value == Owned::new(context, expected));
   }
 }
