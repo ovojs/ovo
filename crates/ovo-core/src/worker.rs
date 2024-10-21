@@ -1,41 +1,31 @@
 use crate::context::{Context, EvalFlag, EvalType};
 use crate::handle::Owned;
 use crate::runtime::Runtime;
-use crate::value::{self, Value};
+use crate::value::Value;
 use anyhow::Error;
-use std::rc::Rc;
-use std::sync::Arc;
 
 pub struct Worker {
-  pub context: Rc<Context>,
+  pub context: Context,
   source: Source,
 }
 
 impl Worker {
-  pub fn new(runtime: Arc<Runtime>, source: Source) -> Self {
+  pub fn new(runtime: &Runtime, source: Source) -> Self {
     Self {
       source,
-      context: Rc::new(Context::new(runtime)),
+      context: Context::new(runtime),
     }
   }
 
   pub fn run(&self) -> Result<Owned<Value>, Error> {
     let (text, path) = self.source.clone().load()?;
-    self.context.evaluate(
-      value::String::new(&self.context, text.as_str()),
-      value::String::new(&self.context, path.as_str()),
-      EvalType::Script(EvalFlag::None),
-    )
+    self
+      .context
+      .evaluate(text, path, EvalType::Script(EvalFlag::None))
   }
 
   pub fn fetch(&self) -> Result<Owned<Value>, Error> {
     unimplemented!()
-  }
-}
-
-impl Drop for Worker {
-  fn drop(&mut self) {
-    drop(self.context.clone())
   }
 }
 
@@ -57,15 +47,14 @@ impl Source {
 
 #[cfg(test)]
 mod tests {
-  use value::Int32;
-
   use super::*;
+  use crate::value::Int32;
 
   #[test]
   fn worker() {
     let runtime = Runtime::new(Default::default());
     let source = Source::Text(String::from("40 + 2"));
-    let worker = Worker::new(runtime, source);
+    let worker = Worker::new(&runtime, source);
     let value = worker.run().expect("42");
     assert!(value == Value::from(Int32::new(&worker.context, 42)));
   }

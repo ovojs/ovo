@@ -201,7 +201,7 @@ mod tests {
 
   #[test]
   fn value_assertion() {
-    let runtime = Runtime::new(RuntimeOptions::default());
+    let runtime = &Runtime::new(RuntimeOptions::default());
     let context = &Context::new(runtime);
 
     let value = true;

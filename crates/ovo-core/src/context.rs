@@ -1,17 +1,16 @@
 use crate::handle::Owned;
 use crate::quickjs::*;
 use crate::runtime::Runtime;
-use crate::value::{String, Value};
+use crate::value::Value;
 use anyhow::{anyhow, Error};
 use std::ffi::c_int;
 use std::mem::transmute;
 use std::ptr::NonNull;
-use std::sync::Arc;
 
 pub struct Context(pub(crate) NonNull<JSContext>);
 
 impl Context {
-  pub fn new(runtime: Arc<Runtime>) -> Self {
+  pub fn new(runtime: &Runtime) -> Self {
     let raw_runtime = runtime.inner.as_ptr();
     let raw_ctx = unsafe { JS_NewContext(raw_runtime) };
     Self(NonNull::new(raw_ctx).expect("non-null context"))
@@ -41,8 +40,6 @@ impl Context {
     referer: String,
     eval_type: EvalType,
   ) -> Result<Owned<Value>, Error> {
-    let source = source.value(self);
-    let referer = referer.value(self);
     let flags = eval_type.to_flags();
     let value = Value(unsafe {
       JS_Eval(
@@ -81,10 +78,8 @@ impl Drop for Context {
 impl Clone for Context {
   fn clone(&self) -> Self {
     let self_raw = self.0.as_ptr();
-    let inner = match NonNull::new(unsafe { JS_DupContext(self_raw) }) {
-      Some(inner) => inner,
-      None => panic!("null context"),
-    };
+    let inner = NonNull::new(unsafe { JS_DupContext(self_raw) })
+      .expect("non-null context");
     Context(inner)
   }
 }
@@ -127,11 +122,11 @@ mod tests {
   #[test]
   fn evaluate_script() {
     let runtime = Runtime::new(RuntimeOptions::default());
-    let context = Context::new(runtime);
+    let context = Context::new(&runtime);
     let value = context
       .evaluate(
-        String::new(&context, "40 + 2"),
-        String::new(&context, "init"),
+        String::from("40 + 2"),
+        String::from("init"),
         EvalType::Script(EvalFlag::None),
       )
       .expect("42");
@@ -143,11 +138,11 @@ mod tests {
   #[test]
   fn evaluate_module() {
     let runtime = Runtime::new(RuntimeOptions::default());
-    let context = Context::new(runtime);
+    let context = Context::new(&runtime);
     let value = context
       .evaluate(
-        String::new(&context, "import A from './A'; 40 + 2"),
-        String::new(&context, "init"),
+        String::from("import A from './A'; 40 + 2"),
+        String::from("init"),
         EvalType::Module(EvalFlag::None),
       )
       .expect("42");

@@ -274,6 +274,7 @@ name = "ovo"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "ovo-core",
 ]
 
 [[package]]
