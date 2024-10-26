@@ -1,10 +1,9 @@
 use crate::handle::Owned;
 use crate::quickjs::*;
 use crate::runtime::Runtime;
+use crate::source::{Flag, Source};
 use crate::value::Value;
-use anyhow::{anyhow, Error};
-use std::ffi::c_int;
-use std::mem::transmute;
+use std::ffi::{c_char, c_int};
 use std::ptr::NonNull;
 
 pub struct Context(pub(crate) NonNull<JSContext>);
@@ -20,50 +19,36 @@ impl Context {
     Self(NonNull::new(raw).expect("non-null context"))
   }
 
-  pub fn compile(
+  pub fn eval(
     &self,
-    source: String,
-    referer: String,
-    is_module: bool,
-  ) -> Result<Owned<Value>, Error> {
-    let eval_type = if is_module {
-      EvalType::Module(EvalFlag::CompileOnly)
-    } else {
-      EvalType::Script(EvalFlag::CompileOnly)
-    };
-    self.evaluate(source, referer, eval_type)
-  }
-
-  pub fn evaluate(
-    &self,
-    source: String,
-    referer: String,
-    eval_type: EvalType,
-  ) -> Result<Owned<Value>, Error> {
-    let flags = eval_type.to_flags();
-    let value = Value(unsafe {
+    source: Source,
+    options: EvalOptions,
+  ) -> Result<Owned<Value>, EvalError> {
+    let code = source.to_raw_code();
+    let flags = source.to_raw_type() | options.flags.to_raw_flag();
+    let name = options.name;
+    let value = unsafe {
       JS_Eval(
         self.0.as_ptr(),
-        source.as_ptr() as *const i8,
-        source.len(),
-        referer.as_ptr() as *const i8,
+        code.as_ptr() as *const c_char,
+        code.len(),
+        name.as_ptr() as *const c_char,
         flags as c_int,
       )
-    });
-    self.to_owned_or_error(value)
+    };
+    self.to_owned_value_or_error(value)
   }
 
-  pub fn evaluate_function(&self, func: Value) -> Result<Owned<Value>, Error> {
-    let value = Value(unsafe { JS_EvalFunction(self.0.as_ptr(), func.into()) });
-    self.to_owned_or_error(value)
-  }
-
-  #[inline(always)]
-  fn to_owned_or_error(&self, value: Value) -> Result<Owned<Value>, Error> {
-    if value.is_exception() {
-      Err(anyhow!("todo: get exception message from value"))
-    } else {
-      Ok(Owned::new(self.clone(), value))
+  fn to_owned_value_or_error(
+    &self,
+    value: JSValue,
+  ) -> Result<Owned<Value>, EvalError> {
+    unsafe {
+      if JS_IsException(value) != 0 {
+        unimplemented!()
+      } else {
+        Ok(Owned::new(self.clone(), Value(value)))
+      }
     }
   }
 }
@@ -84,34 +69,22 @@ impl Clone for Context {
   }
 }
 
-pub enum EvalFlag {
-  None = 0,
-  Async = JS_EVAL_FLAG_ASYNC as isize,
-  CompileOnly = JS_EVAL_FLAG_COMPILE_ONLY as isize,
-  BacktraceBarrier = JS_EVAL_FLAG_BACKTRACE_BARRIER as isize,
-  Strict = JS_EVAL_FLAG_STRICT as isize,
-  Strip = JS_EVAL_FLAG_STRIP as isize,
+pub struct EvalOptions<'a> {
+  name: &'a str,
+  flags: Flag,
 }
 
-impl EvalFlag {
-  fn into_u8(self) -> u8 {
-    unsafe { transmute(self) }
-  }
-}
-
-pub enum EvalType {
-  Script(EvalFlag),
-  Module(EvalFlag),
-}
-
-impl EvalType {
-  fn to_flags(self) -> u32 {
-    match self {
-      Self::Script(flags) => JS_EVAL_TYPE_GLOBAL | flags.into_u8() as u32,
-      Self::Module(flags) => JS_EVAL_TYPE_MODULE | flags.into_u8() as u32,
+impl<'a> Default for EvalOptions<'a> {
+  fn default() -> Self {
+    Self {
+      name: "init",
+      flags: Flag::None,
     }
   }
 }
+
+#[derive(Debug)]
+pub enum EvalError {}
 
 #[cfg(test)]
 mod tests {
@@ -120,32 +93,11 @@ mod tests {
   use crate::value::Int32;
 
   #[test]
-  fn evaluate_script() {
+  fn test_eval() {
     let runtime = Runtime::new(RuntimeOptions::default());
     let context = Context::new(&runtime);
-    let value = context
-      .evaluate(
-        String::from("40 + 2"),
-        String::from("init"),
-        EvalType::Script(EvalFlag::None),
-      )
-      .expect("42");
-    let expected = Value::from(Int32::new(&context, 42));
-    assert!(value == expected);
-    assert!(value == Owned::new(context, expected));
-  }
-
-  #[test]
-  fn evaluate_module() {
-    let runtime = Runtime::new(RuntimeOptions::default());
-    let context = Context::new(&runtime);
-    let value = context
-      .evaluate(
-        String::from("import A from './A'; 40 + 2"),
-        String::from("init"),
-        EvalType::Module(EvalFlag::None),
-      )
-      .expect("42");
+    let source = Source::Global("40 + 2");
+    let value = context.eval(source, EvalOptions::default()).expect("42");
     let expected = Value::from(Int32::new(&context, 42));
     assert!(value == expected);
     assert!(value == Owned::new(context, expected));

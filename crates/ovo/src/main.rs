@@ -1,7 +1,5 @@
 use clap::builder::styling::{AnsiColor, Color, Style};
 use clap::{Parser, Subcommand};
-use ovo_core::runtime::Runtime;
-use ovo_core::worker::{Source, Worker};
 
 #[derive(Parser)]
 #[command(name = "OvO", version, author)]
@@ -65,17 +63,11 @@ enum Command {
 
 fn main() {
   let cli = Cli::parse();
-  let runtime = Runtime::new(Default::default());
   match cli.command {
     Command::New { name } => todo!(),
     Command::Add { name } => todo!(),
     Command::Remove { name } => todo!(),
-    Command::Run { path } => {
-      let path = path.unwrap_or_else(|| String::from("index.js"));
-      let worker = Worker::new(&runtime, Source::File(path));
-      let value = worker.run().expect("value");
-      println!("{}", value.borrow());
-    }
+    Command::Run { path } => todo!(),
     Command::Test {} => todo!(),
     Command::Compile { path } => todo!(),
     Command::Serve { path } => todo!(),
