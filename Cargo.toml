@@ -9,7 +9,7 @@ license = "MIT"
 repository = "https://github.com/ovojs/ovo"
 
 [workspace.dependencies]
-ovo-core = { version = "*", path = "crates/ovo-core"}
+ovo-qjs = { version = "*", path = "crates/ovo-qjs"}
 
 anyhow = "1.0.89"
 clap = "4.5.20"

@@ -1,4 +1,5 @@
-use crate::{context::Context, quickjs::*};
+use crate::context::Context;
+use crate::ffi::*;
 use anyhow::Error;
 use std::collections::HashMap;
 use std::ptr::NonNull;
@@ -52,6 +53,8 @@ impl ModuleLoader for ExtModuleLoader {
     ctx: &Context,
     specifier: ModuleSpecifier,
   ) -> Result<Module, Error> {
+    _ = ctx;
+    _ = specifier;
     unimplemented!()
   }
 }
@@ -60,5 +63,7 @@ pub fn resolve_imports(
   specifier: &str,
   referer: &str,
 ) -> Result<ModuleSpecifier, Error> {
+  _ = specifier;
+  _ = referer;
   unimplemented!()
 }

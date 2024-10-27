@@ -1,6 +1,6 @@
 use crate::context::Context;
+use crate::ffi::*;
 use crate::handle::{CloneFromContext, DropFromContext, PartialEqFromContext};
-use crate::quickjs::*;
 use std::convert::From;
 use std::ffi::{c_char, c_int, CStr};
 use std::mem::transmute;

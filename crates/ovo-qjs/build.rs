@@ -43,10 +43,14 @@ fn main() {
     .compile(&lib_name);
 
   bindgen::Builder::default()
-    .header("build.h")
+    .headers(
+      ["quickjs.h"]
+        .iter()
+        .map(|f| qjs_path.join(f).into_os_string().into_string().unwrap()),
+    )
     .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
     .generate()
     .expect("bindgen: failed to generate.")
-    .write_to_file(out_path.join("bindings.rs"))
+    .write_to_file(out_path.join("bindgen.rs"))
     .expect("bindgen: failed to write bindings.rs");
 }

@@ -1,5 +1,5 @@
+use crate::ffi::*;
 use crate::handle::Owned;
-use crate::quickjs::*;
 use crate::runtime::Runtime;
 use crate::source::{Flag, Source};
 use crate::value::Value;
@@ -36,19 +36,17 @@ impl Context {
         flags as c_int,
       )
     };
-    self.to_owned_value_or_error(value)
+    self.to_owned_value_or_error(Value(value))
   }
 
   fn to_owned_value_or_error(
     &self,
-    value: JSValue,
+    value: Value,
   ) -> Result<Owned<Value>, EvalError> {
-    unsafe {
-      if JS_IsException(value) != 0 {
-        unimplemented!()
-      } else {
-        Ok(Owned::new(self.clone(), Value(value)))
-      }
+    if value.is_exception() {
+      unimplemented!()
+    } else {
+      Ok(Owned::new(self.clone(), value))
     }
   }
 }
@@ -62,8 +60,7 @@ impl Drop for Context {
 
 impl Clone for Context {
   fn clone(&self) -> Self {
-    let self_raw = self.0.as_ptr();
-    let inner = NonNull::new(unsafe { JS_DupContext(self_raw) })
+    let inner = NonNull::new(unsafe { JS_DupContext(self.0.as_ptr()) })
       .expect("non-null context");
     Context(inner)
   }
@@ -96,7 +93,7 @@ mod tests {
   fn test_eval() {
     let runtime = Runtime::new(RuntimeOptions::default());
     let context = Context::new(&runtime);
-    let source = Source::Global("40 + 2");
+    let source = Source::Global(String::from("40 + 2"));
     let value = context.eval(source, EvalOptions::default()).expect("42");
     let expected = Value::from(Int32::new(&context, 42));
     assert!(value == expected);

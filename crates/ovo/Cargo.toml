@@ -7,6 +7,6 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-ovo-core = { workspace = true }
+ovo-qjs = { workspace = true }
 
 clap = { workspace = true, features = ["derive"] }

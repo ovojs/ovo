@@ -274,17 +274,7 @@ name = "ovo"
 version = "0.1.0"
 dependencies = [
  "clap",
- "ovo-core",
-]
-
-[[package]]
-name = "ovo-core"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bindgen",
- "cc",
- "url",
+ "ovo-qjs",
 ]
 
 [[package]]
@@ -298,6 +288,16 @@ version = "0.1.0"
 [[package]]
 name = "ovo-qdb"
 version = "0.1.0"
+
+[[package]]
+name = "ovo-qjs"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bindgen",
+ "cc",
+ "url",
+]
 
 [[package]]
 name = "percent-encoding"

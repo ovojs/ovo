@@ -1,8 +1,8 @@
 use crate::context::Context;
+use crate::ffi::*;
 use crate::module::{
   ExtModuleLoader, ModuleLoader, ModuleSpecifier, ModuleSpecifierMap,
 };
-use crate::quickjs::*;
 use std::ffi::{c_char, c_void, CStr, CString};
 use std::ptr::NonNull;
 use std::rc::Rc;

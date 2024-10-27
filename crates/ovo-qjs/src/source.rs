@@ -1,8 +1,8 @@
-use crate::quickjs::*;
+use crate::ffi::*;
 
-pub enum Source<'a> {
-  Global(&'a str),
-  Module(&'a str),
+pub enum Source {
+  Global(String),
+  Module(String),
 }
 
 pub enum Flag {
@@ -27,7 +27,7 @@ impl Flag {
   }
 }
 
-impl<'a> Source<'a> {
+impl Source {
   pub fn to_raw_type(&self) -> u32 {
     match self {
       Source::Global(_) => JS_EVAL_TYPE_GLOBAL,
@@ -35,7 +35,7 @@ impl<'a> Source<'a> {
     }
   }
 
-  pub fn to_raw_code(&self) -> &str {
+  pub fn to_raw_code(&self) -> &String {
     match self {
       Source::Global(code) => code,
       Source::Module(code) => code,
