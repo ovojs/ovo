@@ -1,6 +1,6 @@
 use crate::context::Context;
+use crate::error::Error;
 use crate::ffi::*;
-use anyhow::Error;
 use std::collections::HashMap;
 use std::ptr::NonNull;
 use url::Url;

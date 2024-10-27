@@ -62,6 +62,10 @@ impl Value {
   pub fn is_exception(&self) -> bool {
     unsafe { JS_IsException(self.0) != 0 }
   }
+
+  pub fn is_error(&self, ctx: &Context) -> bool {
+    unsafe { JS_IsError(ctx.0.as_ptr(), self.0) != 0 }
+  }
 }
 
 impl DropFromContext for Value {
@@ -189,6 +193,13 @@ impl String {
         .to_str()
         .unwrap()
     }
+  }
+}
+
+impl Object {
+  pub fn new(ctx: &Context) -> Self {
+    let inner = unsafe { JS_NewObject(ctx.0.as_ptr()) };
+    Self(inner)
   }
 }
 
