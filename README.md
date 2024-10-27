@@ -5,7 +5,8 @@
 
 ## Goals
 
-- OvO APIs (POSIX-like)
+- OvO APIs
 - Web APIs
-- Node API
+- Node APIs
 - Extensions
+- Typescript
