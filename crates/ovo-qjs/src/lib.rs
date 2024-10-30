@@ -7,4 +7,10 @@ pub mod runtime;
 pub mod source;
 pub mod value;
 
-mod ffi;
+pub mod ext;
+pub mod ffi;
+
+pub use context::*;
+pub use runtime::*;
+pub use source::*;
+pub use value::*;

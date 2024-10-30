@@ -9,7 +9,7 @@ use crate::value::{Object, Value};
 use std::ffi::{c_char, c_int, c_void};
 use std::ptr::NonNull;
 
-pub struct Context(pub(crate) NonNull<JSContext>);
+pub struct Context(pub NonNull<JSContext>);
 
 impl Context {
   pub fn new(runtime: &Runtime) -> Self {

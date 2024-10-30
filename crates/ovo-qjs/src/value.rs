@@ -57,14 +57,83 @@ impl_from!(Object for Value);
 
 impl_from!(Value for JSValue);
 
+macro_rules! try_value_some {
+  ($ctx:ident, $value:ident, $type:ident, $is:ident) => {
+    if $value.$is() {
+      let v: &crate::value::$type = unsafe { std::mem::transmute($value) };
+      return Some(v.value($ctx));
+    }
+  };
+}
+
 impl Value {
+  pub fn from_js_value(raw: JSValue) -> Self {
+    Self(raw)
+  }
+
   #[inline(always)]
   pub fn is_exception(&self) -> bool {
     unsafe { JS_IsException(self.0) != 0 }
   }
 
+  #[inline(always)]
+  pub fn is_null(&self) -> bool {
+    unsafe { JS_IsNull(self.0) != 0 }
+  }
+
+  #[inline(always)]
+  pub fn is_undefined(&self) -> bool {
+    unsafe { JS_IsUndefined(self.0) != 0 }
+  }
+
+  #[inline(always)]
+  pub fn is_bool(&self) -> bool {
+    unsafe { JS_IsBool(self.0) != 0 }
+  }
+
+  #[inline(always)]
+  pub fn is_number(&self) -> bool {
+    unsafe { JS_IsNumber(self.0) != 0 }
+  }
+
+  #[inline(always)]
+  pub fn is_string(&self) -> bool {
+    unsafe { JS_IsString(self.0) != 0 }
+  }
+
+  #[inline(always)]
+  pub fn is_symbol(&self) -> bool {
+    unsafe { JS_IsSymbol(self.0) != 0 }
+  }
+
+  #[inline(always)]
+  pub fn is_object(&self) -> bool {
+    unsafe { JS_IsObject(self.0) != 0 }
+  }
+
+  #[inline(always)]
   pub fn is_error(&self, ctx: &Context) -> bool {
     unsafe { JS_IsError(ctx.0.as_ptr(), self.0) != 0 }
+  }
+
+  #[inline(always)]
+  pub fn is_array(&self, ctx: &Context) -> bool {
+    unsafe { JS_IsArray(ctx.0.as_ptr(), self.0) != 0 }
+  }
+
+  pub fn try_to_i32(&self, ctx: &Context) -> Option<i32> {
+    try_value_some!(ctx, self, Int32, is_number);
+    None
+  }
+
+  pub fn try_to_u32(&self, ctx: &Context) -> Option<u32> {
+    try_value_some!(ctx, self, Uint32, is_number);
+    None
+  }
+
+  pub fn try_to_bool(&self, ctx: &Context) -> Option<bool> {
+    try_value_some!(ctx, self, Bool, is_bool);
+    None
   }
 }
 
