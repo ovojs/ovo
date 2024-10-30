@@ -1,18 +1,23 @@
-#[ovo]
-fn add(a: i32, b: i32) -> i32 {
-  a + b
-}
+use ovo_qjs::{ext, Context, EvalOptions, Runtime, RuntimeOptions, Source};
+
+// #[ovo]
+// fn add(a: i32, b: i32) -> i32 {
+//   a + b
+// }
+
+// ext!(test, ops = [add]);
 
 #[allow(non_camel_case_types)]
-struct op_add;
+struct add;
 
-impl ovo_qjs::ext::Op for op_add {
-  const NAME: &'static str = "add";
-  const DECL: ovo_qjs::ext::OpDecl =
-    ovo_qjs::ext::OpDecl::new(2, Some(Self::js_call));
-}
+impl add {
+  pub fn new() -> ovo_qjs::Op {
+    ovo_qjs::Op {
+      name: "add",
+      r#fn: Some(Self::js_call),
+    }
+  }
 
-impl op_add {
   #[inline(always)]
   fn call(a: i32, b: i32) -> i32 {
     a + b
@@ -24,7 +29,7 @@ impl op_add {
     argc: std::ffi::c_int,
     argv: *mut ovo_qjs::ffi::JSValue,
   ) -> ovo_qjs::ffi::JSValue {
-    let scope = ovo_qjs::ext::CallScope::new(ctx, this_val, argc, argv);
+    let scope = ovo_qjs::CallScope::new(ctx, this_val, argc, argv);
     let Some(arg0) = scope.get(0).try_to_i32(scope.context()) else {
       return scope.throw_type_error("expected i32");
     };
@@ -36,4 +41,32 @@ impl op_add {
   }
 }
 
-fn main() {}
+#[allow(non_camel_case_types)]
+struct test;
+
+impl test {
+  pub fn new() -> ovo_qjs::Ext {
+    ovo_qjs::Ext {
+      name: "test",
+      ops: std::borrow::Cow::Owned(vec![add::new()]),
+    }
+  }
+}
+
+fn main() {
+  let test_ext = test::new();
+  let runtime = Runtime::new(RuntimeOptions {
+    extensions: vec![test_ext],
+    ..Default::default()
+  });
+  let context = Context::new(&runtime);
+  let source = Source::Module(
+    r#"
+import { add } from "ovo:test";
+
+console.log(add(40, 2))    
+    "#
+    .to_string(),
+  );
+  context.eval(source, EvalOptions::default()).expect("eval");
+}

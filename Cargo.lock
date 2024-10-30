@@ -272,6 +272,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "ovo-ext"
+version = "0.1.0"
+
+[[package]]
 name = "ovo-gui"
 version = "0.1.0"
 

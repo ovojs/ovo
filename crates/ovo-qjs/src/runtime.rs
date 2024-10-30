@@ -1,4 +1,5 @@
 use crate::context::Context;
+use crate::extension::Ext;
 use crate::ffi::*;
 use crate::module::{
   ExtModuleLoader, ModuleLoader, ModuleSpecifier, ModuleSpecifierMap,
@@ -10,6 +11,7 @@ use std::rc::Rc;
 #[derive(Default)]
 pub struct RuntimeOptions {
   pub loader: Option<Rc<dyn ModuleLoader>>,
+  pub extensions: Vec<Ext>,
 }
 
 pub struct Runtime {
