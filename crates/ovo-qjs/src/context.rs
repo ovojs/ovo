@@ -18,18 +18,17 @@ impl Context {
     Self(NonNull::new(raw_ctx).expect("non-null context"))
   }
 
-  pub fn from_raw(raw: *mut JSContext) -> Self {
-    Self(NonNull::new(raw).expect("non-null context"))
+  #[inline(always)]
+  pub fn set_class_proto(&self, class_id: u32, proto: Value) {
+    unsafe { JS_SetClassProto(self.0.as_ptr(), class_id, proto.into()) }
   }
 
-  pub fn set_class_proto(&self, class_id: u32, obj: Value) {
-    unsafe { JS_SetClassProto(self.0.as_ptr(), class_id, obj.into()) }
+  #[inline(always)]
+  pub fn set_constructor(&self, func_val: Value, proto: Value) {
+    unsafe { JS_SetConstructor(self.0.as_ptr(), func_val.into(), proto.into()) }
   }
 
-  pub fn set_constructor(&self, func_obj: Value, proto: Value) {
-    unsafe { JS_SetConstructor(self.0.as_ptr(), func_obj.into(), proto.into()) }
-  }
-
+  #[inline(always)]
   pub fn set_constructor_bit(
     &self,
     func_obj: Value,
@@ -40,16 +39,19 @@ impl Context {
     })
   }
 
+  #[inline(always)]
   pub fn set_opaque<T>(&self, opaque: NonNull<T>) {
     unsafe {
       JS_SetContextOpaque(self.0.as_ptr(), opaque.as_ptr() as *mut c_void)
     }
   }
 
+  #[inline(always)]
   pub fn set_is_html_dda(&self, obj: Value) {
     unsafe { JS_SetIsHTMLDDA(self.0.as_ptr(), obj.into()) }
   }
 
+  #[inline(always)]
   pub fn set_module_export(
     &self,
     module: Module,
@@ -66,6 +68,7 @@ impl Context {
     })
   }
 
+  #[inline(always)]
   pub fn set_property(
     &self,
     this_obj: Object,
@@ -77,12 +80,14 @@ impl Context {
     })
   }
 
+  #[inline(always)]
   pub fn set_prototype(&self, obj: Value, proto: Value) -> Result<bool, Error> {
     self.to_bool_or_error(unsafe {
       JS_SetPrototype(self.0.as_ptr(), obj.into(), proto.into())
     })
   }
 
+  #[inline(always)]
   pub fn get_global_object(&self) -> Value {
     Value(unsafe { JS_GetGlobalObject(self.0.as_ptr()) })
   }
@@ -101,8 +106,9 @@ impl Context {
     })
   }
 
-  pub fn is_error(&self, value: Value) -> bool {
-    unsafe { JS_IsError(self.0.as_ptr(), value.into()) != 0 }
+  #[inline(always)]
+  pub fn throw_type_error(&self, msg: &str) -> JSValue {
+    unsafe { JS_ThrowTypeError(self.0.as_ptr(), msg.as_ptr() as *const i8) }
   }
 
   pub fn eval(
@@ -152,6 +158,12 @@ impl Context {
     } else {
       todo!("JS_GetException");
     }
+  }
+}
+
+impl From<*mut JSContext> for Context {
+  fn from(raw: *mut JSContext) -> Self {
+    Self(NonNull::new(raw).expect("non-null context"))
   }
 }
 

@@ -29,15 +29,16 @@ impl add {
     argc: std::ffi::c_int,
     argv: *mut ovo_qjs::ffi::JSValue,
   ) -> ovo_qjs::ffi::JSValue {
-    let scope = ovo_qjs::CallScope::new(ctx, this_val, argc, argv);
-    let Some(arg0) = scope.get(0).try_to_i32(scope.context()) else {
-      return scope.throw_type_error("expected i32");
+    let ctx = ovo_qjs::Context::from(ctx);
+    let args = ovo_qjs::CallArgs::new(this_val, argc, argv);
+    let Some(arg0) = args.get(0).try_to_i32(&ctx) else {
+      return ctx.throw_type_error("expected i32");
     };
-    let Some(arg1) = scope.get(1).try_to_i32(scope.context()) else {
-      return scope.throw_type_error("expected i32");
+    let Some(arg1) = args.get(1).try_to_i32(&ctx) else {
+      return ctx.throw_type_error("expected i32");
     };
     let result = Self::call(arg0, arg1);
-    ovo_qjs::Value::from(ovo_qjs::Int32::new(scope.context(), result)).into()
+    ovo_qjs::Value::from(ovo_qjs::Int32::new(&ctx, result)).into()
   }
 }
 

@@ -48,7 +48,7 @@ unsafe extern "C" fn module_resolver_unsafe(
   module_name: *const c_char,
   opaque: *mut c_void,
 ) -> *mut c_char {
-  let context = Context::from_raw(ctx);
+  let context = Context::from(ctx);
   let opaque = NonNull::new(opaque).expect("non-null opaque");
   let runtime = opaque.as_ptr() as *const Runtime;
   let module_name = CStr::from_ptr(module_name)
@@ -74,7 +74,7 @@ unsafe extern "C" fn module_loader_unsafe(
   module_name: *const c_char,
   opaque: *mut c_void,
 ) -> *mut JSModuleDef {
-  let context = Context::from_raw(ctx);
+  let context = Context::from(ctx);
   let opaque = NonNull::new(opaque).expect("non-null opaque");
   let runtime = opaque.as_ptr() as *mut Runtime;
   // Re-take the ownership of module_name returned by module_resolver_unsafe
