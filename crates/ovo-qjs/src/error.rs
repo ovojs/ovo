@@ -1,4 +1,5 @@
 #[derive(Debug)]
 pub enum Error {
-  Eval,
+  Evaluate,
+  Internal(&'static str),
 }

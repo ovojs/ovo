@@ -33,6 +33,9 @@ pub struct Float64(pub(crate) JSValue);
 pub struct String(pub(crate) JSValue);
 
 #[repr(C)]
+pub struct Symbol(pub(crate) JSValue);
+
+#[repr(C)]
 pub struct Object(pub(crate) JSValue);
 
 macro_rules! impl_from {
@@ -53,6 +56,7 @@ impl_from!(BigInt64 for Value);
 impl_from!(BigUint64 for Value);
 impl_from!(Float64 for Value);
 impl_from!(String for Value);
+impl_from!(Symbol for Value);
 impl_from!(Object for Value);
 
 impl_from!(Value for JSValue);
@@ -151,7 +155,7 @@ impl CloneFromContext for Value {
 
 impl PartialEqFromContext for Value {
   fn eq_from_context(&self, ctx: &Context, other: &Self) -> bool {
-    unsafe { JS_StrictEq(ctx.0.as_ptr(), self.0, other.0) != 0 }
+    unsafe { JS_IsStrictEqual(ctx.0.as_ptr(), self.0, other.0) != 0 }
   }
 }
 
@@ -261,6 +265,18 @@ impl String {
       CStr::from_ptr(JS_ToCString(ctx.0.as_ptr(), self.0))
         .to_str()
         .unwrap()
+    }
+  }
+}
+
+impl Symbol {
+  pub fn new(ctx: &Context, name: &'static str, is_global: bool) -> Self {
+    unsafe {
+      Self(JS_NewSymbol(
+        ctx.0.as_ptr(),
+        name.as_ptr() as *const i8,
+        is_global as i32,
+      ))
     }
   }
 }

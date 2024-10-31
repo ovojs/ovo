@@ -11,7 +11,6 @@ pub enum Flag {
   CompileOnly,
   BacktraceBarrier,
   Strict,
-  Strip,
 }
 
 impl Flag {
@@ -22,7 +21,6 @@ impl Flag {
       Flag::CompileOnly => JS_EVAL_FLAG_COMPILE_ONLY,
       Flag::BacktraceBarrier => JS_EVAL_FLAG_BACKTRACE_BARRIER,
       Flag::Strict => JS_EVAL_FLAG_STRICT,
-      Flag::Strip => JS_EVAL_FLAG_STRIP,
     }
   }
 }

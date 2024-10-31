@@ -4,6 +4,8 @@ use crate::value::Value;
 use std::borrow::Cow;
 use std::ffi::c_int;
 
+pub type Fn = fn(&Context, CallArgs) -> Value;
+
 #[derive(Clone, Copy)]
 pub struct Op {
   pub name: &'static str,
@@ -14,6 +16,8 @@ pub struct Ext {
   pub name: &'static str,
   pub ops: Cow<'static, [Op]>,
 }
+
+impl Ext {}
 
 pub struct CallArgs {
   this_val: Value,
@@ -36,12 +40,31 @@ impl CallArgs {
   }
 
   #[inline(always)]
-  pub fn get(&self, i: usize) -> Value {
-    unsafe { Value::from_js_value(*self.argv.add(i)) }
+  pub fn get(&self, idx: u8) -> Value {
+    if idx > self.argc {
+      panic!("argument index out of range")
+    }
+    unsafe { Value::from_js_value(*self.argv.add(idx as usize)) }
   }
 }
 
 #[macro_export]
 macro_rules! ext {
   ($name:ident $(, ops = [ $($op:ident)+ ])?) => {};
+}
+
+#[macro_export]
+macro_rules! function {
+  ($name:ident $f:expr) => {
+    unsafe extern "C" fn $name(
+      ctx: *mut ovo_qjs::ffi::JSContext,
+      this_val: ovo_qjs::ffi::JSValue,
+      argc: std::ffi::c_int,
+      argv: *mut ovo_qjs::ffi::JSValue,
+    ) -> ovo_qjs::ffi::JSValue {
+      let ctx = ovo_qjs::Context::from(ctx);
+      let args = ovo_qjs::CallArgs::new(this_val, argc, argv);
+      ovo_qjs::Value::from($f(&ctx, args)).into()
+    }
+  };
 }

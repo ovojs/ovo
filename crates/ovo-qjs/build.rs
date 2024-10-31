@@ -1,11 +1,9 @@
-use std::{env, fs, path::PathBuf};
+use std::{env, path::PathBuf};
 
 fn main() {
   let lib_name = "quickjs";
   let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
   let qjs_path = PathBuf::from("quickjs");
-  let qjs_version = fs::read_to_string(qjs_path.join("VERSION"))
-    .expect("std: failed to read QuickJS version.");
 
   cc::Build::new()
     .files(
@@ -18,10 +16,6 @@ fn main() {
       ]
       .iter()
       .map(|f| qjs_path.join(f)),
-    )
-    .define(
-      "CONFIG_VERSION",
-      format!("\"{}\"", qjs_version.trim()).as_str(),
     )
     // Flags below are used by the official Makefile.
     .flag_if_supported("-Wchar-subscripts")
@@ -49,6 +43,7 @@ fn main() {
         .map(|f| qjs_path.join(f).into_os_string().into_string().unwrap()),
     )
     .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
+    .blocklist_item("FP_(NAN|INFINITE|ZERO|SUBNORMAL|NORMAL)")
     .generate()
     .expect("bindgen: failed to generate.")
     .write_to_file(out_path.join("bindgen.rs"))

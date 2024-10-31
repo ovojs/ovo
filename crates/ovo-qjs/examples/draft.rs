@@ -1,4 +1,4 @@
-use ovo_qjs::{ext, Context, EvalOptions, Runtime, RuntimeOptions, Source};
+use ovo_qjs::{Context, EvalOptions, Runtime, RuntimeOptions, Source};
 
 // #[ovo]
 // fn add(a: i32, b: i32) -> i32 {
@@ -32,10 +32,10 @@ impl add {
     let ctx = ovo_qjs::Context::from(ctx);
     let args = ovo_qjs::CallArgs::new(this_val, argc, argv);
     let Some(arg0) = args.get(0).try_to_i32(&ctx) else {
-      return ctx.throw_type_error("expected i32");
+      return ctx.throw_type_error("expected i32").into();
     };
     let Some(arg1) = args.get(1).try_to_i32(&ctx) else {
-      return ctx.throw_type_error("expected i32");
+      return ctx.throw_type_error("expected i32").into();
     };
     let result = Self::call(arg0, arg1);
     ovo_qjs::Value::from(ovo_qjs::Int32::new(&ctx, result)).into()
@@ -51,6 +51,16 @@ impl test {
       name: "test",
       ops: std::borrow::Cow::Owned(vec![add::new()]),
     }
+  }
+
+  #[allow(dead_code)]
+  unsafe extern "C" fn js_init_module(
+    ctx: *mut ovo_qjs::ffi::JSContext,
+    m: *mut ovo_qjs::ffi::JSModuleDef,
+  ) {
+    _ = ctx;
+    _ = m;
+    todo!(" how do we JS_SetModuleExportList here?")
   }
 }
 
@@ -69,5 +79,7 @@ console.log(add(40, 2))
     "#
     .to_string(),
   );
-  context.eval(source, EvalOptions::default()).expect("eval");
+  context
+    .evaluate(source, EvalOptions::default())
+    .expect("eval");
 }

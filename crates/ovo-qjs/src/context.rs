@@ -1,11 +1,12 @@
 use crate::atom::Atom;
 use crate::error::Error;
-use crate::ffi::*;
 use crate::handle::Owned;
 use crate::module::Module;
 use crate::runtime::Runtime;
 use crate::source::{Flag, Source};
 use crate::value::{Object, Value};
+use crate::{ffi::*, Op};
+use std::borrow::{Borrow, Cow};
 use std::ffi::{c_char, c_int, c_void};
 use std::ptr::NonNull;
 
@@ -71,13 +72,24 @@ impl Context {
   #[inline(always)]
   pub fn set_property(
     &self,
-    this_obj: Object,
+    this_obj: &Object,
     name: Atom,
     prop: Value,
   ) -> Result<bool, Error> {
     self.to_bool_or_error(unsafe {
       JS_SetProperty(self.0.as_ptr(), this_obj.0, name.0, prop.into())
     })
+  }
+
+  pub fn set_property_ops(
+    &self,
+    obj: &Object,
+    ops: Cow<'static, [Op]>,
+  ) -> Result<(), Error> {
+    // unsafe {
+    //   JS_SetPropertyFunctionList(self.0.as_ptr(), Value::from(obj));
+    // }
+    todo!()
   }
 
   #[inline(always)]
@@ -107,11 +119,66 @@ impl Context {
   }
 
   #[inline(always)]
-  pub fn throw_type_error(&self, msg: &str) -> JSValue {
-    unsafe { JS_ThrowTypeError(self.0.as_ptr(), msg.as_ptr() as *const i8) }
+  pub fn throw_type_error(&self, msg: &str) -> Value {
+    unsafe {
+      Value(JS_ThrowTypeError(
+        self.0.as_ptr(),
+        msg.as_ptr() as *const i8,
+      ))
+    }
   }
 
-  pub fn eval(
+  #[inline(always)]
+  pub fn throw_internal_error(&self, msg: &str) -> Value {
+    unsafe {
+      Value(JS_ThrowInternalError(
+        self.0.as_ptr(),
+        msg.as_ptr() as *const i8,
+      ))
+    }
+  }
+
+  #[inline(always)]
+  pub fn throw_range_error(&self, msg: &str) -> Value {
+    unsafe {
+      Value(JS_ThrowRangeError(
+        self.0.as_ptr(),
+        msg.as_ptr() as *const i8,
+      ))
+    }
+  }
+
+  #[inline(always)]
+  pub fn throw_reference_error(&self, msg: &str) -> Value {
+    unsafe {
+      Value(JS_ThrowReferenceError(
+        self.0.as_ptr(),
+        msg.as_ptr() as *const i8,
+      ))
+    }
+  }
+
+  #[inline(always)]
+  pub fn throw_syntax_error(&self, msg: &str) -> Value {
+    unsafe {
+      Value(JS_ThrowSyntaxError(
+        self.0.as_ptr(),
+        msg.as_ptr() as *const i8,
+      ))
+    }
+  }
+
+  #[inline(always)]
+  pub fn throw_out_of_memory(&self) -> Value {
+    unsafe { Value(JS_ThrowOutOfMemory(self.0.as_ptr())) }
+  }
+
+  #[inline(always)]
+  pub fn throw(&self, value: Value) -> Value {
+    unsafe { Value(JS_Throw(self.0.as_ptr(), value.into())) }
+  }
+
+  pub fn evaluate(
     &self,
     source: Source,
     options: EvalOptions,
@@ -130,13 +197,23 @@ impl Context {
     }))
   }
 
+  pub fn set_module_import_meta(
+    &self,
+    func_val: Value,
+    is_main: bool,
+  ) -> Result<(), Error> {
+    _ = func_val;
+    _ = is_main;
+    unimplemented!()
+  }
+
   #[inline(always)]
   fn to_owned_value_or_error(
     &self,
     value: Value,
   ) -> Result<Owned<Value>, Error> {
     if value.is_exception() {
-      Err(Error::Eval)
+      Err(Error::Evaluate)
     } else {
       Ok(Owned::new(self.clone(), value))
     }
@@ -207,7 +284,9 @@ mod tests {
     let runtime = Runtime::new(RuntimeOptions::default());
     let context = Context::new(&runtime);
     let source = Source::Global(String::from("40 + 2"));
-    let value = context.eval(source, EvalOptions::default()).expect("42");
+    let value = context
+      .evaluate(source, EvalOptions::default())
+      .expect("42");
     let expected = Value::from(Int32::new(&context, 42));
     assert!(value == expected);
     assert!(value == Owned::new(context, expected));

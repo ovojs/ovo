@@ -55,6 +55,7 @@ impl ModuleLoader for ExtModuleLoader {
   ) -> Result<Module, Error> {
     _ = ctx;
     _ = specifier;
+    _ = self.specifier_map;
     unimplemented!()
   }
 }
