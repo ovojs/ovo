@@ -25,7 +25,7 @@ mod tests {
         JS_EVAL_TYPE_GLOBAL as i32,
       );
 
-      let eq = JS_StrictEq(ctx, val, JS_NewInt32(ctx, 42));
+      let eq = JS_IsStrictEqual(ctx, val, JS_NewInt32(ctx, 42));
       assert_eq!(eq, true as i32);
 
       JS_FreeValue(ctx, val);
