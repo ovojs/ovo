@@ -15,6 +15,8 @@ impl add {
     ovo_qjs::Op {
       name: "add",
       r#fn: Some(Self::js_call),
+      argc: 2,
+      magic: 0,
     }
   }
 

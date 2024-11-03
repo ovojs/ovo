@@ -1,12 +1,13 @@
 use crate::atom::Atom;
 use crate::error::Error;
+use crate::ffi::*;
 use crate::handle::Owned;
 use crate::module::Module;
+use crate::property::Property;
 use crate::runtime::Runtime;
 use crate::source::{Flag, Source};
 use crate::value::{Object, Value};
-use crate::{ffi::*, Op};
-use std::borrow::{Borrow, Cow};
+use std::borrow::Cow;
 use std::ffi::{c_char, c_int, c_void};
 use std::ptr::NonNull;
 
@@ -53,6 +54,50 @@ impl Context {
   }
 
   #[inline(always)]
+  pub fn set_property(
+    &self,
+    this_obj: Object,
+    name: Atom,
+    prop: Value,
+  ) -> Result<bool, Error> {
+    self.to_bool_or_error(unsafe {
+      JS_SetProperty(self.0.as_ptr(), this_obj.0, name.0, prop.into())
+    })
+  }
+
+  pub fn set_property_list(
+    &self,
+    obj: Object,
+    prop_list: Cow<'static, [Property]>,
+  ) -> Result<(), Error> {
+    let mut entries: Vec<JSCFunctionListEntry> = prop_list
+      .iter()
+      .map(|prop| prop.to_js_cfunction_list_entry())
+      .collect();
+    unsafe {
+      JS_SetPropertyFunctionList(
+        self.0.as_ptr(),
+        Value::from(obj).into(),
+        entries.as_mut_ptr(),
+        entries.len() as std::ffi::c_int,
+      );
+    }
+    Ok(())
+  }
+
+  #[inline(always)]
+  pub fn set_prototype(&self, obj: Value, proto: Value) -> Result<bool, Error> {
+    self.to_bool_or_error(unsafe {
+      JS_SetPrototype(self.0.as_ptr(), obj.into(), proto.into())
+    })
+  }
+
+  #[inline(always)]
+  pub fn get_global_object(&self) -> Value {
+    Value(unsafe { JS_GetGlobalObject(self.0.as_ptr()) })
+  }
+
+  #[inline(always)]
   pub fn set_module_export(
     &self,
     module: Module,
@@ -70,40 +115,6 @@ impl Context {
   }
 
   #[inline(always)]
-  pub fn set_property(
-    &self,
-    this_obj: &Object,
-    name: Atom,
-    prop: Value,
-  ) -> Result<bool, Error> {
-    self.to_bool_or_error(unsafe {
-      JS_SetProperty(self.0.as_ptr(), this_obj.0, name.0, prop.into())
-    })
-  }
-
-  pub fn set_property_ops(
-    &self,
-    obj: &Object,
-    ops: Cow<'static, [Op]>,
-  ) -> Result<(), Error> {
-    // unsafe {
-    //   JS_SetPropertyFunctionList(self.0.as_ptr(), Value::from(obj));
-    // }
-    todo!()
-  }
-
-  #[inline(always)]
-  pub fn set_prototype(&self, obj: Value, proto: Value) -> Result<bool, Error> {
-    self.to_bool_or_error(unsafe {
-      JS_SetPrototype(self.0.as_ptr(), obj.into(), proto.into())
-    })
-  }
-
-  #[inline(always)]
-  pub fn get_global_object(&self) -> Value {
-    Value(unsafe { JS_GetGlobalObject(self.0.as_ptr()) })
-  }
-
   pub fn add_module_export(
     &self,
     module: Module,
@@ -114,6 +125,44 @@ impl Context {
         self.0.as_ptr(),
         module.0.as_ptr(),
         name.as_ptr() as *const i8,
+      )
+    })
+  }
+
+  pub fn set_module_export_list(
+    &self,
+    module: Module,
+    prop_list: Cow<'static, [Property]>,
+  ) -> Result<(), Error> {
+    let mut entries: Vec<JSCFunctionListEntry> = prop_list
+      .iter()
+      .map(|prop| prop.to_js_cfunction_list_entry())
+      .collect();
+    self.to_void_or_error(unsafe {
+      JS_SetModuleExportList(
+        self.0.as_ptr(),
+        module.0.as_ptr(),
+        entries.as_mut_ptr(),
+        entries.len() as std::ffi::c_int,
+      )
+    })
+  }
+
+  pub fn add_module_export_list(
+    &self,
+    module: Module,
+    prop_list: Cow<'static, [Property]>,
+  ) -> Result<(), Error> {
+    let mut entries: Vec<JSCFunctionListEntry> = prop_list
+      .iter()
+      .map(|prop| prop.to_js_cfunction_list_entry())
+      .collect();
+    self.to_void_or_error(unsafe {
+      JS_AddModuleExportList(
+        self.0.as_ptr(),
+        module.0.as_ptr(),
+        entries.as_mut_ptr(),
+        entries.len() as std::ffi::c_int,
       )
     })
   }

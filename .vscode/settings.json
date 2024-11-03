@@ -7,5 +7,6 @@
   "files.associations": {
     "text_encoding": "cpp",
     "typeinfo": "cpp"
-  }
+  },
+  "cmake.sourceDirectory": "/home/x/ovojs/ovo/crates/ovo-qjs/quickjs"
 }

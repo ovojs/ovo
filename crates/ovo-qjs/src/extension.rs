@@ -1,7 +1,7 @@
 use crate::context::Context;
 use crate::ffi::*;
 use crate::value::Value;
-use std::borrow::Cow;
+use std::borrow::{Borrow, Cow};
 use std::ffi::c_int;
 
 pub type Fn = fn(&Context, CallArgs) -> Value;
@@ -10,6 +10,8 @@ pub type Fn = fn(&Context, CallArgs) -> Value;
 pub struct Op {
   pub name: &'static str,
   pub r#fn: JSCFunction,
+  pub argc: u8,
+  pub magic: i16,
 }
 
 pub struct Ext {
@@ -35,8 +37,8 @@ impl CallArgs {
   }
 
   #[inline(always)]
-  pub fn this(&self) -> &Value {
-    &self.this_val
+  pub fn this_ref(&self) -> &Value {
+    self.this_val.borrow()
   }
 
   #[inline(always)]
