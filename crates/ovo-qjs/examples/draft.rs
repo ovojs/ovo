@@ -1,4 +1,7 @@
-use ovo_qjs::{Context, EvalOptions, Runtime, RuntimeOptions, Source};
+use ovo_qjs::{
+  ffi::JS_SetModuleExportList, Context, EvalOptions, Runtime, RuntimeOptions,
+  Source,
+};
 
 // #[ovo]
 // fn add(a: i32, b: i32) -> i32 {
@@ -60,9 +63,12 @@ impl test {
     ctx: *mut ovo_qjs::ffi::JSContext,
     m: *mut ovo_qjs::ffi::JSModuleDef,
   ) {
-    _ = ctx;
-    _ = m;
-    todo!(" how do we JS_SetModuleExportList here?")
+    let mut entries: Vec<JSCFunctionListEntry> = props
+      .iter()
+      .map(|prop| prop.to_js_cfunction_list_entry())
+      .collect();
+
+    JS_SetModuleExportList(ctx, m, tab, len);
   }
 }
 

@@ -132,9 +132,9 @@ impl Context {
   pub fn set_module_export_list(
     &self,
     module: Module,
-    prop_list: Cow<'static, [Property]>,
+    props: Cow<'static, [Property]>,
   ) -> Result<(), Error> {
-    let mut entries: Vec<JSCFunctionListEntry> = prop_list
+    let mut entries: Vec<JSCFunctionListEntry> = props
       .iter()
       .map(|prop| prop.to_js_cfunction_list_entry())
       .collect();
@@ -151,9 +151,9 @@ impl Context {
   pub fn add_module_export_list(
     &self,
     module: Module,
-    prop_list: Cow<'static, [Property]>,
+    props: Cow<'static, [Property]>,
   ) -> Result<(), Error> {
-    let mut entries: Vec<JSCFunctionListEntry> = prop_list
+    let mut entries: Vec<JSCFunctionListEntry> = props
       .iter()
       .map(|prop| prop.to_js_cfunction_list_entry())
       .collect();
@@ -329,15 +329,30 @@ mod tests {
   use crate::value::Int32;
 
   #[test]
-  fn test_eval() {
+  fn test_eval_global() {
     let runtime = Runtime::new(RuntimeOptions::default());
     let context = Context::new(&runtime);
-    let source = Source::Global(String::from("40 + 2"));
+    let source = Source::Global("40 + 2".to_string());
     let value = context
       .evaluate(source, EvalOptions::default())
       .expect("42");
     let expected = Value::from(Int32::new(&context, 42));
     assert!(value == expected);
     assert!(value == Owned::new(context, expected));
+  }
+
+  #[test]
+  fn test_eval_module() {
+    let runtime = Runtime::new(RuntimeOptions::default());
+    let context = Context::new(&runtime);
+    let source = Source::Module(
+      r#"
+  import { add } from "ovo:test";
+  
+  console.log(add(40, 2))
+      "#
+      .to_string(),
+    );
+    let _ = context.evaluate(source, EvalOptions::default());
   }
 }
