@@ -7,5 +7,3 @@ use url::Url;
 pub type ModuleSpecifier = Url;
 
 pub struct Module(pub(crate) NonNull<JSModuleDef>);
-
-impl Module {}

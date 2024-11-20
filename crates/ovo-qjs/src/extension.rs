@@ -48,6 +48,11 @@ impl CallArgs {
     }
     unsafe { Value::from_js_value(*self.argv.add(idx as usize)) }
   }
+
+  #[inline(always)]
+  pub fn len(&self) -> u8 {
+    self.argc
+  }
 }
 
 #[macro_export]
@@ -59,14 +64,14 @@ macro_rules! ext {
 macro_rules! function {
   ($name:ident $f:expr) => {
     unsafe extern "C" fn $name(
-      ctx: *mut ovo_qjs::ffi::JSContext,
-      this_val: ovo_qjs::ffi::JSValue,
+      ctx: *mut $crate::ffi::JSContext,
+      this_val: $crate::ffi::JSValue,
       argc: std::ffi::c_int,
-      argv: *mut ovo_qjs::ffi::JSValue,
-    ) -> ovo_qjs::ffi::JSValue {
-      let ctx = ovo_qjs::Context::from(ctx);
-      let args = ovo_qjs::CallArgs::new(this_val, argc, argv);
-      ovo_qjs::Value::from($f(&ctx, args)).into()
+      argv: *mut $crate::ffi::JSValue,
+    ) -> $crate::ffi::JSValue {
+      let ctx = $crate::context::Context::from(ctx);
+      let args = $crate::extension::CallArgs::new(this_val, argc, argv);
+      $crate::value::Value::from($f(&ctx, args)).into()
     }
   };
 }

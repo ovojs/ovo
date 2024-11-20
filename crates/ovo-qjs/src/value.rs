@@ -139,6 +139,15 @@ impl Value {
     try_value_some!(ctx, self, Bool, is_bool);
     None
   }
+
+  pub fn try_to_string(&self, ctx: &Context) -> Option<std::string::String> {
+    if self.is_string() {
+      let v: &String = unsafe { std::mem::transmute(self) };
+      Some(v.value(ctx).to_string())
+    } else {
+      None
+    }
+  }
 }
 
 impl DropFromContext for Value {
